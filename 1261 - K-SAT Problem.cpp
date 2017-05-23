@@ -1,3 +1,7 @@
+/**
+Key: Implementation
+*/
+
 #include<bits/stdc++.h>
 using namespace std;
 int ara[35][35];
