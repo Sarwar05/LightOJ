@@ -1,3 +1,6 @@
+/************
+Key idea: Catalan Number and (nCr)%m
+*************/
 #include<bits/stdc++.h>
 using namespace std;
 #define mx 100005
