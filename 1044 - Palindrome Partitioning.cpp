@@ -1,3 +1,4 @@
+// https://sarwar05.blogspot.com/2018/06/1044-palindrome-partitioning.html
 #include<bits/stdc++.h>
 using namespace std;
 #define inf 10000007
