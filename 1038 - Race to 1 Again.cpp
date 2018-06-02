@@ -1,3 +1,4 @@
+// http://sarwar05.blogspot.com/2018/06/1038-Race-to-1-Again.html
 #include<bits/stdc++.h>
 using namespace std;
 double dp[100001];
