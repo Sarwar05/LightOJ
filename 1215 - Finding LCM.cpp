@@ -1,117 +1,94 @@
 #include<bits/stdc++.h>
 using namespace std;
-typedef long long int ll;
-#define mx 1000005
-int arr[mx] ={0};
-vector<ll > prime;
-void sieve();
-int main()
-{
-    sieve();
-    int tc,i, power; scanf("%d",&tc);
-    ll a,b,c,l,x, ans,p,q,r;
-    for(int cs=1; cs<=tc; cs++){
-        ans = 1;
-        scanf("%lld%lld%lld", &a, &b,&l);
-        map<ll, int> lh, rh,c;
-        /**** factorization starts****/
-        i=0, x = a;
-        while(prime[i]*prime[i]<=x){
-            if(x%prime[i]==0){
-                power = 0;
-                while(x%prime[i]==0){
-                    power++;
-                    x/=prime[i];
-                }
-                lh[ prime[i] ] = max(lh[ prime[i] ], power);
-            }
-            i++;
-        }
-        if(x>1)
-            lh[x] = max(lh[x], 1);
-        i=0, x = b;
-        while(prime[i]*prime[i]<=x){
-            if(x%prime[i]==0){
-                power = 0;
-                while(x%prime[i]==0){
-                    power++;
-                    x/=prime[i];
-                }
-                lh[ prime[i] ] = max(lh[ prime[i] ], power);
-            }
-            i++;
-        }
-        if(x>1)
-            lh[x] = max(lh[x], 1);
-        i=0, x = l;
-        while(prime[i]*prime[i]<=x){
-            if(x%prime[i]==0){
-                power = 0;
-                while(x%prime[i]==0){
-                    power++;
-                    x/=prime[i];
-                }
-                rh[ prime[i] ] = max(rh[ prime[i] ], power);
-            }
-            i++;
-        }
-        if(x>1)
-            rh[x] = max(rh[x], 1);
-        /**** factorization okay ****/
-        /**** calculation starts ****/
-        map<ll , int> ::iterator it = lh.begin();
-        bool flag = true;
-        while(it!= lh.end()){
-            r = it->first;
-            if(rh.find(r) == rh.end()){
-                flag = false;
-                break;
-            }
-            else{
-                p = it->second, q = rh[r];
-                if(p<q){
-                    ans = ans * pow(r, q);
-                    rh[r] = -1;
-                }
-                else if(p>q){
-                    flag = false;
-                    break;
-                }
-                else{
-                    rh[r] = -1;
-                }
-            }
-            it++;
-        }
-        if(flag){
-            //cout<<"res "<<ans<<endl;
-            map<ll , int> ::iterator it2 = rh.begin();
-            while(it2 != rh.end()){
-                if(it2->second != -1){
-                    //cout<<"for "<<it2->first<<" rais to  "<<it2->second<<endl;
-                    ans = ans * pow(it2->first, it2->second);
-                }
-                it2++;
-            }
-        }
-        /**** calculation okay ****/
-        printf("Case %d: ", cs);
-        if(!flag) printf("impossible\n");
-        else printf("%lld\n", ans);
-    }
-    return 0;
-}
+#define ll long long
+vector<int> prime;
+bitset<1000007>bs;
 void sieve()
 {
-    prime.push_back(2);
-    arr[0] = arr[1] = 1;
-    for(ll i=4; i<mx; i+=2 ) arr[i] = 1;
-    for(ll i=3; i<mx; i+=2){
-        if(arr[i]==0){
-            prime.push_back(i);
-            for(ll j= i*i; j<mx; j+= i+i)
-                arr[j] = 1;
-        }
+	bs[0] = bs[1] = 1;
+	for(ll i=2; i<=1000000; i++){
+		if(!bs[i]){
+			prime.push_back(i);
+			for(ll j = i*i; j<=1000000; j+=i)
+				bs[j] = 1;
+		}
+	}
+}
+ll pow(ll b, ll p)
+{
+	if(p==0) return 1;
+	ll x = pow(b,p/2);
+	x*=x;
+	if(p%2==1) x*=b;
+	return x;
+}
+map<ll, int> get(ll a, ll b)
+{
+	map<ll, int> ret;
+	int id = 0;
+	ll pf = prime[id];
+	while(pf*pf <= a){
+		if(a%pf==0){
+			int po = 0;
+			while(a%pf==0){
+				po++;
+				a/=pf;
+			}
+			ret[pf] = max(ret[pf], po);
+		}
+		pf = prime[++id];
+	}
+	if(a>1) ret[a] = max(ret[a],1);
+	if(b==0) return ret;
+	id = 0;
+	pf = prime[id];
+	a = b;
+	while(pf*pf <= a){
+		if(a%pf==0){
+			int po = 0;
+			while(a%pf==0){
+				po++;
+				a/=pf;
+			}
+			ret[pf] = max(ret[pf], po);
+		}
+		pf = prime[++id];
+	}
+	if(a>1) ret[a] = max(ret[a],1);
+	return ret;
+}
+int main()
+{
+	sieve();
+    int tc, cs=1;
+    scanf("%d",&tc);
+    ll a,b,c,L;
+    while(tc--){
+    	scanf("%lld%lld%lld",&a,&b,&L);
+    	printf("Case %d: ",cs++ );
+    	map<ll, int> map1 = get(a,b);
+    	map<ll, int> map2 = get(L,0);
+    	map<ll, int> :: iterator it = map1.begin();
+    	int ok = 1;
+    	c = 1;
+    	while(it!=map1.end()){
+    		int pf = it->first;
+    		int po1 = it->second;
+    		int po2 = map2[pf];
+    		if(po1>po2){
+    			ok = 0;
+    			break;
+    		}
+    		if(po1!=po2)c*=pow(pf,po2);
+    		map2.erase(pf);
+    		it++;
+    	}
+    	map<ll, int> :: iterator it2 = map2.begin();
+    	while(it2!=map2.end() && ok){
+    		c*=pow( it2->first,it2->second);
+    		it2++;
+    	}
+    	if(ok==0) printf("impossible\n");
+    	else printf("%lld\n",c);
     }
 }
-
