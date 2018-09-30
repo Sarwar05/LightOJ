@@ -33,7 +33,7 @@ int main()
         for(int i=1; i<=n; i++)
             scanf("%lf%lf",&mark[i].got, &mark[i].total);
         double lo = 0, hi = 100, mid,ans = 0;
-        for(int i=1; i<=25; i++){
+        for(int i=1; i<=30; i++){
             mid = (lo+hi)/2.0;
             if(check(mid, n, use)){
                 lo = mid;
