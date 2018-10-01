@@ -38,11 +38,13 @@ int main()
     scanf("%d",&tc);
     while(tc--){
         scanf("%d%d",&n,&m);
-        for(int i=1; i<=n; i++)
+        int hi = 50001;
+        for(int i=1; i<=n; i++){
             scanf("%d%d",&input[i].ff, &input[i].ss);
-        int lo = 0, hi = 50000, mid,ans = 50002;
-        /// binary search on time
-        while(lo<=hi){
+            hi = min(hi, (input[i].ff + input[i].ss)*m);
+        }
+        int lo = 0, mid,ans = 50002;
+        while(lo<=hi){ ///binary search on time
             mid= (lo+hi)/2;
             limit = mid;
             memset(dp, -1, sizeof dp);
