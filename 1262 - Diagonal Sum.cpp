@@ -37,7 +37,6 @@ struct Dinic
     }
     void addEdge(int from, int to, ll cap, int a)
     {
-        //cout<<"add: "<<from<<" "<<to<<" "<<cap<<" "<<a<<endl;
         edges.push_back(Edge(from, to, cap,a));
         adj[from].push_back(m++);
         edges.push_back(Edge(to, from, 0,-1));
@@ -79,7 +78,6 @@ struct Dinic
     }
     ll getFlow()
     {
-        for(int i=0; i<m; i++) edges[i].flow = 0;
         ll maxFlow = 0;
         while(true){
             fill(level.begin(), level.end(), -1);
@@ -91,13 +89,12 @@ struct Dinic
             while(ll pushed = dfs(source, inf))
                 maxFlow+=pushed;
         }
-        //cout<<"maxFlow: "<<maxFlow<<endl;
         return maxFlow;
     }
 };
 #define mx 52
-int mat[mx][mx], used[mx*mx], ray1[mx*2], ray2[mx*2];
-pair<int, int> anti[mx*mx];
+int mat[mx][mx], in, cross1[mx*mx], cross2[mx*mx], cnt1[mx*2], cnt2[mx*2];
+int anti[mx*mx][2];
 int main()
 {
     int tc, cs=1, r,c;
@@ -108,90 +105,62 @@ int main()
         for(int i=1; i<=r; i++){
             for(int j=1; j<=c; j++){
                 mat[i][j] = ++val;
-                anti[val] = make_pair(i,j);
+                anti[val][0] = i;
+                anti[val][1] = j;
             }
         }
         int n = r+c-1;
         Dinic dinic(n + n + 2, 0, n + n + 1);
-        vector<int> cross1[n+1], cross2[n+1];
-        /**
-        generate cross
-        */
+        memset(cnt1, 0, sizeof cnt1);
+        memset(cnt2, 0, sizeof cnt2);
         int id = 1,x, p;
-        memset(used, 0, sizeof used);
+        memset(cross1, -1, sizeof cross1);
         for(int i=1,x=1; x<=r; i+=c, x++, id++){
             int now = i;
             p = i;
-            vector<int> v;
-            while(now>0 && used[now]==0){
-                used[now] = 1;
-                v.push_back(now);
+            while(now>0 && cross1[now]==-1){
+                cross1[now] = id;
+                cnt1[id]++;
                 now-=(c-1);
             }
-            cross1[id] = v;
         }
         for(int i = p+1; i<=r*c; i++, id++){
             int now = i;
-            vector<int> v;
-            while(now>0 && used[now]==0){
-                used[now] = 1;
-                v.push_back(now);
+            while(now>0 && cross1[now]==-1){
+                cross1[now] = id;
+                cnt1[id]++;
                 now-=(c-1);
             }
-            cross1[id] = v;
         }
-        /// //////////////////////
         id = 1;
-        memset(used, 0, sizeof used);
+        memset(cross2, -1, sizeof cross2);
         for(int i=c,x=1; x<=r; i+=c, x++, id++){
             int now = i;
             p = i;
-            vector<int> v;
-            while(now>0 && used[now]==0){
-                used[now] = 1;
-                v.push_back(now);
+            while(now>0 && cross2[now]==-1){
+                cross2[now] = id;
+                cnt2[id]++;
                 now-=(c+1);
             }
-            cross2[id] = v;
         }
-        //cout<<"ok"<<endl;
-        for(int i = p-1; used[i]==0 && i>0; i--, id++){
+        for(int i = p-1; cross2[i]==-1 && i>0; i--, id++){
             int now = i;
-            vector<int> v;
-            while(now>0 && used[now]==0){
-                used[now] = 1;
-                v.push_back(now);
+            while(now>0 && cross2[now]==-1){
+                cross2[now] = id;
+                cnt2[id]++;
                 now-=(c+1);
             }
-            cross2[id] = v;
-        }
-
-//        for(int i=1; i<=n; i++){
-//            for(int j=0; j<cross2[i].size(); j++){
-//                cout<<cross2[i][j]<<" ";
-//            }
-//            cout<<endl;
-//        }
-        /// //////////////////////////////////////
-        for(int i=1; i<=n; i++){
-            scanf("%d", &ray1[i]);
-            dinic.addEdge(0, i, ray1[i] - (int)cross1[i].size(), -1);
         }
         for(int i=1; i<=n; i++){
-            scanf("%d", &ray2[i]);
-            dinic.addEdge(n+i, n+n+1, ray2[i] - (int)cross2[i].size(), -1);
+            scanf("%d", &in);
+            dinic.addEdge(0, i, in - cnt1[i], -1);
         }
         for(int i=1; i<=n; i++){
-            for(int j=1; j<=n; j++){
-                for(int k1 = 0; k1<cross1[i].size(); k1++){
-                    for(int k2 = 0; k2<cross2[j].size(); k2++){
-                        int a = cross1[i][k1];
-                        int b = cross2[j][k2];
-                        if(a==b)
-                            dinic.addEdge(i, n+j, 99, a);
-                    }
-                }
-            }
+            scanf("%d", &in);
+            dinic.addEdge(n+i, n+n+1, in - cnt2[i], -1);
+        }
+        for(int i=1; i<=r*c; i++){
+            dinic.addEdge(cross1[i], n+cross2[i], 99, i);
         }
         for(int i=1; i<=r; i++){
             for(int j=1; j<=c; j++)
@@ -200,10 +169,8 @@ int main()
         dinic.getFlow();
         for(int i=0; i<dinic.m; i++){
             int a = dinic.edges[i].a;
-            if(a != -1){
-            //cout<<a<<" "<<dinic.edges[i].flow<<endl;
-                mat[anti[a].first][anti[a].second]+=dinic.edges[i].flow;
-            }
+            if(a != -1)
+                mat[anti[a][0]][anti[a][1]]+=dinic.edges[i].flow;
         }
         printf("Case %d:\n", cs++);
         for(int i=1; i<=r; i++){
